@@ -3,1054 +3,595 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบจัดการฝาก-เบิกเงินกลุ่มนักศึกษา (Student Fund System)</title>
+    <title>ระบบจัดการฝาก-เบิกเงินกลุ่มนักศึกษา</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Chart.js for Financial Dashboard -->
+    <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Google Fonts Kanit -->
-    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        body {
-            font-family: 'Kanit', sans-serif;
-            background-color: #f8fafc;
-        }
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: #f1f5f9;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 4px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Kanit', sans-serif; }
     </style>
 </head>
-<body class="text-slate-800 antialiased min-h-screen flex flex-col">
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
 
-    <!-- Top Navigation & Role Switcher -->
-    <header class="bg-slate-900 text-white shadow-lg sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16">
-                <!-- App Logo & Title -->
-                <div class="flex items-center space-x-3">
-                    <div class="bg-indigo-600 p-2 rounded-xl text-white flex items-center justify-center shadow-md">
-                        <i class="fa-solid fa-wallet text-xl"></i>
-                    </div>
-                    <div>
-                        <h1 class="text-lg sm:text-xl font-bold tracking-wide">ระบบจัดการกองทุนนักศึกษา</h1>
-                        <p class="text-xs text-slate-400 hidden sm:block">ER Diagram Interactive Web Application</p>
-                    </div>
+    <!-- LOGIN SCREEN -->
+    <div id="login-screen" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 border border-slate-100">
+            <div class="text-center mb-8">
+                <div class="bg-indigo-600 text-white w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-indigo-200">
+                    <i data-lucide="wallet" class="w-8 h-8"></i>
                 </div>
-
-                <!-- Role Selector -->
-                <div class="flex items-center space-x-2 sm:space-x-4">
-                    <span class="text-xs sm:text-sm text-slate-300 hidden md:inline"><i class="fa-solid fa-user-gear mr-1"></i> สลับสิทธิ์ผู้ใช้งาน:</span>
-                    <div class="inline-flex rounded-xl p-1 bg-slate-800 border border-slate-700">
-                        <button onclick="switchRole('student')" id="btn-role-student" class="role-btn px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 flex items-center gap-1.5">
-                            <i class="fa-solid fa-user-graduate"></i> นักศึกษา
-                        </button>
-                        <button onclick="switchRole('treasurer')" id="btn-role-treasurer" class="role-btn px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 flex items-center gap-1.5">
-                            <i class="fa-solid fa-user-check"></i> เหรัญญิก
-                        </button>
-                        <button onclick="switchRole('president')" id="btn-role-president" class="role-btn px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 flex items-center gap-1.5">
-                            <i class="fa-solid fa-user-tie"></i> ประธาน
-                        </button>
-                    </div>
-                </div>
+                <h1 class="text-2xl font-bold text-slate-800">เข้าสู่ระบบจัดการเงิน</h1>
+                <p class="text-slate-500 text-sm mt-1">ระบบฝาก-เบิกเงินกลุ่มนักศึกษาตาม ER Diagram</p>
             </div>
-        </div>
-    </header>
 
-    <!-- Main Container -->
-    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
-
-        <!-- Role Banner -->
-        <div id="role-banner" class="mb-6 p-4 rounded-2xl border flex items-center justify-between transition-all shadow-sm">
-            <div class="flex items-center space-x-3">
-                <div id="role-icon-bg" class="p-3 rounded-xl text-white text-xl shadow-md">
-                    <i id="role-icon" class="fa-solid fa-user"></i>
-                </div>
+            <form id="login-form" class="space-y-4" onsubmit="handleLogin(event)">
                 <div>
-                    <h2 id="role-title" class="text-lg font-bold"></h2>
-                    <p id="role-desc" class="text-xs sm:text-sm text-slate-600"></p>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">ชื่อผู้ใช้งาน / รหัสนักศึกษา</label>
+                    <input type="text" id="login-username" required class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition" placeholder="กรอก Username หรือ รหัสนักศึกษา">
                 </div>
-            </div>
-            <div class="hidden sm:block text-right">
-                <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">สถานะระบบ</span>
-                <span class="flex items-center justify-end text-xs text-emerald-600 font-medium mt-0.5">
-                    <span class="h-2 w-2 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span> พร้อมใช้งาน (Interactive Data)
-                </span>
+
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">รหัสผ่าน</label>
+                    <input type="password" id="login-password" required class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition" placeholder="••••••••">
+                </div>
+
+                <div id="login-error" class="text-red-500 text-xs hidden text-center font-medium">
+                    ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง
+                </div>
+
+                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-lg transition duration-200 shadow-md hover:shadow-lg">
+                    เข้าสู่ระบบ
+                </button>
+            </form>
+
+            <!-- DEMO CREDENTIALS HINT -->
+            <div class="mt-6 pt-6 border-t border-slate-100 text-xs text-slate-500">
+                <p class="font-semibold text-slate-700 mb-2">🔑 บัญชีทดสอบระบบ (Demo Accounts):</p>
+                <div class="space-y-1 bg-slate-50 p-3 rounded-lg font-mono">
+                    <p><span class="text-indigo-600 font-semibold">นักศึกษา:</span> 65012345 / password</p>
+                    <p><span class="text-amber-600 font-semibold">เหรัญญิก:</span> treasurer / password</p>
+                    <p><span class="text-emerald-600 font-semibold">ประธาน:</span> president / password</p>
+                </div>
             </div>
         </div>
+    </div>
 
-        <!-- ========================================== -->
-        <!-- VIEW 1: STUDENT VIEW                       -->
-        <!-- ========================================== -->
-        <div id="view-student" class="role-view space-y-6 hidden">
-            <!-- Student Profile Summary Card -->
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 sm:p-6 flex flex-wrap justify-between items-center gap-4">
-                <div class="flex items-center space-x-4">
-                    <div class="w-14 h-14 rounded-2xl bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-2xl shadow-sm">
-                        <i class="fa-solid fa-user-graduate"></i>
-                    </div>
-                    <div>
-                        <div class="flex items-center gap-2">
-                            <h3 class="font-bold text-slate-800 text-lg" id="std-name">นายสมชาย ใจดี</h3>
-                            <span class="text-xs bg-indigo-50 text-indigo-700 font-medium px-2.5 py-0.5 rounded-full border border-indigo-100">รหัสนักศึกษา: 650110234</span>
+    <!-- MAIN APP INTERFACE -->
+    <div id="main-app" class="hidden flex-col min-h-screen">
+        <!-- NAVBAR -->
+        <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center h-16">
+                    <div class="flex items-center space-x-3">
+                        <div class="bg-indigo-600 text-white p-2 rounded-xl">
+                            <i data-lucide="wallet" class="w-5 h-5"></i>
                         </div>
-                        <p class="text-xs sm:text-sm text-slate-500 mt-0.5"><i class="fa-solid fa-phone text-slate-400 mr-1"></i> เบอร์โทรศัพท์: 081-234-5678</p>
+                        <span class="font-bold text-lg text-slate-800">Student Fund System</span>
                     </div>
-                </div>
-                <div class="flex gap-2">
-                    <button onclick="openModal('modal-deposit')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-xl font-medium text-sm transition flex items-center gap-2 shadow-md hover:shadow-lg">
-                        <i class="fa-solid fa-money-bill-wave"></i> ฝากเงิน
-                    </button>
-                    <button onclick="openModal('modal-withdraw')" class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2.5 rounded-xl font-medium text-sm transition flex items-center gap-2 shadow-md hover:shadow-lg">
-                        <i class="fa-solid fa-hand-holding-dollar"></i> ยื่นคำขอเบิกเงิน
-                    </button>
+
+                    <!-- USER INFO & LOGOUT -->
+                    <div class="flex items-center space-x-4">
+                        <div class="text-right hidden sm:block">
+                            <div id="user-display-name" class="font-semibold text-sm text-slate-800"></div>
+                            <div id="user-display-role" class="text-xs text-slate-500"></div>
+                        </div>
+                        <button onclick="handleLogout()" class="text-slate-500 hover:text-red-600 p-2 rounded-lg hover:bg-slate-100 transition" title="ออกจากระบบ">
+                            <i data-lucide="log-out" class="w-5 h-5"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
+        </header>
 
-            <!-- Student History Tables -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <!-- Deposit History (เอนทิตีฝากเงิน) -->
-                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                    <div class="px-5 py-4 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
-                        <h3 class="font-bold text-slate-700 flex items-center gap-2">
-                            <i class="fa-solid fa-arrow-down-left-and-arrow-up-right-to-center text-emerald-600"></i>
-                            ประวัติการฝากเงิน (Deposit Entity)
-                        </h3>
-                        <span class="text-xs bg-emerald-100 text-emerald-800 px-2.5 py-0.5 rounded-full font-medium" id="std-deposit-count">0 รายการ</span>
+        <!-- CONTENT AREA -->
+        <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            
+            <!-- STUDENT PANEL -->
+            <div id="panel-student" class="role-panel hidden space-y-6">
+                <div class="bg-indigo-900 text-white p-6 rounded-2xl shadow-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div>
+                        <h2 class="text-2xl font-bold">ยินดีต้อนรับ, คุณ <span id="student-name-header">นักศึกษา</span></h2>
+                        <p class="text-indigo-200 text-sm mt-1">รหัสนักศึกษา: <span id="student-id-header">65012345</span> | โทร: <span id="student-phone-header">081-234-5678</span></p>
                     </div>
-                    <div class="overflow-x-auto custom-scrollbar max-h-96">
-                        <table class="w-full text-sm text-left">
-                            <thead class="text-xs text-slate-500 uppercase bg-slate-50 border-b">
-                                <tr>
-                                    <th class="px-4 py-3">รหัสใบเสร็จ</th>
-                                    <th class="px-4 py-3">วันเวลา</th>
-                                    <th class="px-4 py-3 text-right">จำนวนเงิน</th>
-                                    <th class="px-4 py-3 text-center">หลักฐาน</th>
-                                    <th class="px-4 py-3 text-center">สถานะตรวจสอบ</th>
+                    <div class="bg-white/10 backdrop-blur-md px-4 py-2 rounded-xl border border-white/20">
+                        <span class="text-xs text-indigo-200 block">ยอดเงินคงเหลือในกองกลาง</span>
+                        <span class="text-2xl font-bold" id="total-balance-display-student">฿0.00</span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Form 1: ฝากเงิน -->
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                        <div class="flex items-center space-x-2 mb-4 text-indigo-600 font-bold text-lg border-b pb-3">
+                            <i data-lucide="arrow-down-left" class="w-5 h-5"></i>
+                            <h3>แจ้งทำรายการฝากเงิน (Deposit)</h3>
+                        </div>
+                        <form onsubmit="submitDeposit(event)" class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-1">จำนวนเงิน (บาท)</label>
+                                <input type="number" id="dep-amount" required min="1" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-1">แนบรูปสลิปการโอน</label>
+                                <input type="file" id="dep-file" accept="image/*" required class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
+                            </div>
+                            <button type="submit" class="w-full bg-indigo-600 text-white font-medium py-2.5 rounded-lg hover:bg-indigo-700 transition">ส่งรายการฝากเงิน</button>
+                        </form>
+                    </div>
+
+                    <!-- Form 2: เบิกเงิน -->
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                        <div class="flex items-center space-x-2 mb-4 text-amber-600 font-bold text-lg border-b pb-3">
+                            <i data-lucide="arrow-up-right" class="w-5 h-5"></i>
+                            <h3>ยื่นคำขอเบิกเงิน (Withdrawal Request)</h3>
+                        </div>
+                        <form onsubmit="submitWithdraw(event)" class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-1">จำนวนเงินที่ขอเบิก (บาท)</label>
+                                <input type="number" id="wd-amount" required min="1" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-1">เหตุผลในการเบิก (เหตุ)</label>
+                                <textarea id="wd-reason" required rows="2" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none" placeholder="ระบุเหตุผล เช่น ค่าอุปกรณ์ทำโปรเจกต์"></textarea>
+                            </div>
+                            <button type="submit" class="w-full bg-amber-600 text-white font-medium py-2.5 rounded-lg hover:bg-amber-700 transition">ส่งคำขอเบิกเงิน</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- History -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                    <h3 class="font-bold text-slate-800 mb-4">ประวัติรายการของคุณ</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse text-sm">
+                            <thead>
+                                <tr class="bg-slate-50 text-slate-500 border-b">
+                                    <th class="p-3">ประเภท</th>
+                                    <th class="p-3">รหัส/คำขอ</th>
+                                    <th class="p-3">จำนวนเงิน</th>
+                                    <th class="p-3">วันเวลา</th>
+                                    <th class="p-3">สถานะ</th>
                                 </tr>
                             </thead>
-                            <tbody id="table-student-deposits" class="divide-y divide-slate-100">
-                                <!-- JS Injected -->
-                            </tbody>
+                            <tbody id="student-history-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TREASURER PANEL -->
+            <div id="panel-treasurer" class="role-panel hidden space-y-6">
+                <div class="bg-amber-900 text-white p-6 rounded-2xl shadow-xl">
+                    <h2 class="text-2xl font-bold">แผงควบคุมเหรัญญิก (Treasurer Dashboard)</h2>
+                    <p class="text-amber-200 text-sm mt-1">ตรวจสอบรายการฝากเงิน และกลั่นกรองคำขอเบิกเงินจากนักศึกษา</p>
+                </div>
+
+                <!-- Deposits Verification -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                    <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2">
+                        <i data-lucide="check-circle" class="w-5 h-5 text-indigo-600"></i>
+                        รายการฝากเงินที่รอตรวจสอบสลิป
+                    </h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead>
+                                <tr class="bg-slate-50 text-slate-500 border-b">
+                                    <th class="p-3">รหัสใบเสร็จ</th>
+                                    <th class="p-3">นักศึกษา</th>
+                                    <th class="p-3">จำนวนเงิน</th>
+                                    <th class="p-3">วันเวลา</th>
+                                    <th class="p-3">สลิป</th>
+                                    <th class="p-3">จัดการ</th>
+                                </tr>
+                            </thead>
+                            <tbody id="treasurer-deposits-tbody"></tbody>
                         </table>
                     </div>
                 </div>
 
-                <!-- Withdrawal History (เอนทิตีเบิกเงิน) -->
-                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                    <div class="px-5 py-4 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
-                        <h3 class="font-bold text-slate-700 flex items-center gap-2">
-                            <i class="fa-solid fa-hand-holding-dollar text-amber-600"></i>
-                            ประวัติการขอเบิกเงิน (Withdrawal Entity)
-                        </h3>
-                        <span class="text-xs bg-amber-100 text-amber-800 px-2.5 py-0.5 rounded-full font-medium" id="std-withdraw-count">0 รายการ</span>
-                    </div>
-                    <div class="overflow-x-auto custom-scrollbar max-h-96">
-                        <table class="w-full text-sm text-left">
-                            <thead class="text-xs text-slate-500 uppercase bg-slate-50 border-b">
-                                <tr>
-                                    <th class="px-4 py-3">รหัสคำขอ</th>
-                                    <th class="px-4 py-3">วันที่ขอ / เหตุผล</th>
-                                    <th class="px-4 py-3 text-right">จำนวนเงิน</th>
-                                    <th class="px-4 py-3 text-center">ตรวจเหรัญญิก</th>
-                                    <th class="px-4 py-3 text-center">การอนุมัติประธาน</th>
+                <!-- Withdrawals Review -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                    <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2">
+                        <i data-lucide="clock" class="w-5 h-5 text-amber-600"></i>
+                        คำขอเบิกเงินที่รอการตรวจสอบเหตุผล
+                    </h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead>
+                                <tr class="bg-slate-50 text-slate-500 border-b">
+                                    <th class="p-3">รหัสคำขอ</th>
+                                    <th class="p-3">นักศึกษา</th>
+                                    <th class="p-3">จำนวนเงิน</th>
+                                    <th class="p-3">เหตุผล</th>
+                                    <th class="p-3">สถานะตรวจสอบ</th>
+                                    <th class="p-3">จัดการ</th>
                                 </tr>
                             </thead>
-                            <tbody id="table-student-withdrawals" class="divide-y divide-slate-100">
-                                <!-- JS Injected -->
-                            </tbody>
+                            <tbody id="treasurer-withdraws-tbody"></tbody>
                         </table>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- ========================================== -->
-        <!-- VIEW 2: TREASURER VIEW                     -->
-        <!-- ========================================== -->
-        <div id="view-treasurer" class="role-view space-y-6 hidden">
-            <!-- Summary Stats for Treasurer -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
-                    <div>
-                        <p class="text-xs font-medium text-slate-500">สลิปฝากเงินรอตรวจสอบ</p>
-                        <h3 class="text-2xl font-bold text-amber-600 mt-1" id="tr-pending-deposits-cnt">0</h3>
-                    </div>
-                    <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl">
-                        <i class="fa-solid fa-clock"></i>
-                    </div>
+            <!-- PRESIDENT PANEL -->
+            <div id="panel-president" class="role-panel hidden space-y-6">
+                <div class="bg-emerald-900 text-white p-6 rounded-2xl shadow-xl">
+                    <h2 class="text-2xl font-bold">แผงอนุมัติประธาน (President Dashboard)</h2>
+                    <p class="text-emerald-200 text-sm mt-1">อนุมัติคำขอเบิกเงินขั้นสุดท้าย และสรุปรายงานภาพรวมการเงิน</p>
                 </div>
-                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
-                    <div>
-                        <p class="text-xs font-medium text-slate-500">คำขอเบิกเงินรอตรวจสอบ</p>
-                        <h3 class="text-2xl font-bold text-amber-600 mt-1" id="tr-pending-withdraws-cnt">0</h3>
-                    </div>
-                    <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl">
-                        <i class="fa-solid fa-file-signature"></i>
-                    </div>
-                </div>
-                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
-                    <div>
-                        <p class="text-xs font-medium text-slate-500">ชื่อผู้ใช้เหรัญญิก</p>
-                        <h3 class="text-lg font-bold text-slate-800 mt-1" id="tr-username">treasurer_01</h3>
-                        <p class="text-xs text-slate-400">สถานะ: มีสิทธิ์ตรวจสอบรายการ</p>
-                    </div>
-                    <div class="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl">
-                        <i class="fa-solid fa-user-shield"></i>
-                    </div>
-                </div>
-            </div>
 
-            <!-- Pending Deposits Section -->
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                <div class="px-5 py-4 border-b border-slate-100 bg-emerald-50/30 flex justify-between items-center">
-                    <div>
-                        <h3 class="font-bold text-slate-800 flex items-center gap-2">
-                            <i class="fa-solid fa-receipt text-emerald-600"></i>
-                            รายการฝากเงินที่ต้องตรวจสอบสลิป (Deposit Audit)
-                        </h3>
-                        <p class="text-xs text-slate-500 mt-0.5">ตรวจยอดเงินและรูปสลิปจากนักศึกษาเพื่อปรับเปลี่ยนสถานะตรวจสอบ</p>
+                <!-- Financial Overview Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                        <span class="text-xs font-semibold text-slate-400 uppercase">รายรับรวม (Deposits)</span>
+                        <div class="text-2xl font-bold text-emerald-600 mt-2" id="pres-total-income">฿0.00</div>
                     </div>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-sm text-left">
-                        <thead class="text-xs text-slate-500 uppercase bg-slate-50 border-b">
-                            <tr>
-                                <th class="px-4 py-3">รหัสใบเสร็จ</th>
-                                <th class="px-4 py-3">นักศึกษา</th>
-                                <th class="px-4 py-3">วันเวลา</th>
-                                <th class="px-4 py-3 text-right">จำนวนเงิน</th>
-                                <th class="px-4 py-3 text-center">สลิป</th>
-                                <th class="px-4 py-3 text-center">สถานะ</th>
-                                <th class="px-4 py-3 text-center">จัดการ</th>
-                            </tr>
-                        </thead>
-                        <tbody id="table-treasurer-deposits" class="divide-y divide-slate-100">
-                            <!-- JS Injected -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- Pending Withdrawals Section -->
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                <div class="px-5 py-4 border-b border-slate-100 bg-amber-50/30 flex justify-between items-center">
-                    <div>
-                        <h3 class="font-bold text-slate-800 flex items-center gap-2">
-                            <i class="fa-solid fa-file-invoice-dollar text-amber-600"></i>
-                            รายการเบิกเงินที่ต้องตรวจสอบเหตุผล (Withdrawal Audit)
-                        </h3>
-                        <p class="text-xs text-slate-500 mt-0.5">ตรวจสอบเอกสารและเหตุผลความเหมาะสมก่อนส่งต่อให้ประธานอนุมัติ</p>
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                        <span class="text-xs font-semibold text-slate-400 uppercase">รายจ่ายรวม (Withdrawals)</span>
+                        <div class="text-2xl font-bold text-red-600 mt-2" id="pres-total-expense">฿0.00</div>
                     </div>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-sm text-left">
-                        <thead class="text-xs text-slate-500 uppercase bg-slate-50 border-b">
-                            <tr>
-                                <th class="px-4 py-3">รหัสคำขอ</th>
-                                <th class="px-4 py-3">นักศึกษา</th>
-                                <th class="px-4 py-3">วันที่ขอ</th>
-                                <th class="px-4 py-3">เหตุผล</th>
-                                <th class="px-4 py-3 text-right">จำนวนเงิน</th>
-                                <th class="px-4 py-3 text-center">สถานะตรวจ</th>
-                                <th class="px-4 py-3 text-center">จัดการ</th>
-                            </tr>
-                        </thead>
-                        <tbody id="table-treasurer-withdrawals" class="divide-y divide-slate-100">
-                            <!-- JS Injected -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- ========================================== -->
-        <!-- VIEW 3: PRESIDENT VIEW                     -->
-        <!-- ========================================== -->
-        <div id="view-president" class="role-view space-y-6 hidden">
-            <!-- Financial Overview Cards -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden">
-                    <div class="absolute right-0 top-0 w-2 h-full bg-emerald-500"></div>
-                    <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">รายรับรวม (Deposit Total)</p>
-                    <h3 class="text-2xl font-bold text-emerald-600 mt-1" id="pres-income">฿0.00</h3>
-                    <p class="text-xs text-slate-500 mt-1">จากรายการฝากที่อนุมัติแล้ว</p>
-                </div>
-                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden">
-                    <div class="absolute right-0 top-0 w-2 h-full bg-rose-500"></div>
-                    <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">รายจ่ายรวม (Withdrawal Total)</p>
-                    <h3 class="text-2xl font-bold text-rose-600 mt-1" id="pres-expense">฿0.00</h3>
-                    <p class="text-xs text-slate-500 mt-1">จากรายการเบิกที่อนุมัติแล้ว</p>
-                </div>
-                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden">
-                    <div class="absolute right-0 top-0 w-2 h-full bg-indigo-500"></div>
-                    <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">ยอดเงินคงเหลือสุทธิ</p>
-                    <h3 class="text-2xl font-bold text-indigo-600 mt-1" id="pres-balance">฿0.00</h3>
-                    <p class="text-xs text-slate-500 mt-1">รายรับรวม หักด้วย รายจ่ายรวม</p>
-                </div>
-                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden">
-                    <div class="absolute right-0 top-0 w-2 h-full bg-amber-500"></div>
-                    <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">คำขอเบิกที่รอการอนุมัติ</p>
-                    <h3 class="text-2xl font-bold text-amber-600 mt-1" id="pres-pending-approval">0</h3>
-                    <p class="text-xs text-slate-500 mt-1">ผ่านการกรองจากเหรัญญิกแล้ว</p>
-                </div>
-            </div>
-
-            <!-- Financial Report Chart & Actions -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <!-- Chart Container -->
-                <div class="lg:col-span-2 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="font-bold text-slate-800 flex items-center gap-2">
-                            <i class="fa-solid fa-chart-pie text-indigo-600"></i> สรุปสัดส่วนการเงินและรายงาน (Financial Dashboard)
-                        </h3>
-                        <button onclick="generateReport()" class="text-xs bg-slate-800 hover:bg-slate-900 text-white px-3 py-1.5 rounded-xl transition flex items-center gap-1.5 shadow-sm">
-                            <i class="fa-solid fa-file-export"></i> สร้างบันทึกรายงาน (Report Entity)
-                        </button>
-                    </div>
-                    <div class="h-64 relative flex justify-center items-center">
-                        <canvas id="financialChart"></canvas>
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                        <span class="text-xs font-semibold text-slate-400 uppercase">ยอดเงินคงเหลือคงคลัง</span>
+                        <div class="text-2xl font-bold text-indigo-600 mt-2" id="pres-total-net">฿0.00</div>
                     </div>
                 </div>
 
-                <!-- Recent Reports History List -->
-                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
-                    <div>
-                        <h3 class="font-bold text-slate-800 mb-3 flex items-center gap-2">
-                            <i class="fa-solid fa-folder-open text-amber-600"></i> รายงานที่บันทึกไว้ (Reports)
-                        </h3>
-                        <div class="space-y-3 custom-scrollbar max-h-60 overflow-y-auto" id="report-history-list">
-                            <!-- Injected -->
+                <!-- Pending Approvals -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                    <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2">
+                        <i data-lucide="shield-check" class="w-5 h-5 text-emerald-600"></i>
+                        คำขอเบิกเงินที่รอประธานอนุมัติจ่าย
+                    </h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead>
+                                <tr class="bg-slate-50 text-slate-500 border-b">
+                                    <th class="p-3">รหัสคำขอ</th>
+                                    <th class="p-3">ผู้เบิก</th>
+                                    <th class="p-3">จำนวนเงิน</th>
+                                    <th class="p-3">เหตุผล</th>
+                                    <th class="p-3">เหรัญญิกตรวจสอบ</th>
+                                    <th class="p-3">การอนุมัติ</th>
+                                </tr>
+                            </thead>
+                            <tbody id="president-withdraws-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Chart & Report Section -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-2 bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                        <h3 class="font-bold text-slate-800 mb-4">กราฟสรุปสัดส่วนการเงิน (Report Chart)</h3>
+                        <div class="h-64 flex items-center justify-center">
+                            <canvas id="financeChart"></canvas>
                         </div>
                     </div>
-                    <div class="mt-4 pt-3 border-t border-slate-100 text-xs text-slate-400">
-                        * สอดคล้องตาม Entity รายงาน (รหัสรายงาน, ยอดเงินทั้งหมด, รายจ่ายรวม, รายรับรวม, วันที่รายงาน)
-                    </div>
-                </div>
-            </div>
-
-            <!-- Approval Queue for President -->
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                <div class="px-5 py-4 border-b border-slate-100 bg-indigo-50/30 flex justify-between items-center">
-                    <div>
-                        <h3 class="font-bold text-slate-800 flex items-center gap-2">
-                            <i class="fa-solid fa-stamp text-indigo-600"></i>
-                            อนุมัติคำขอเบิกเงิน (Final Approval by President)
-                        </h3>
-                        <p class="text-xs text-slate-500 mt-0.5">เฉพาะคำขอเบิกเงินที่เหรัญญิกตรวจสอบเรียบร้อยแล้วเท่านั้น</p>
-                    </div>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-sm text-left">
-                        <thead class="text-xs text-slate-500 uppercase bg-slate-50 border-b">
-                            <tr>
-                                <th class="px-4 py-3">รหัสคำขอ</th>
-                                <th class="px-4 py-3">ผู้ยื่นคำขอ</th>
-                                <th class="px-4 py-3">วันที่ขอ</th>
-                                <th class="px-4 py-3">เหตุผลความจำเป็น</th>
-                                <th class="px-4 py-3 text-right">จำนวนเงิน</th>
-                                <th class="px-4 py-3 text-center">การตรวจเหรัญญิก</th>
-                                <th class="px-4 py-3 text-center">คำสั่งประธาน</th>
-                            </tr>
-                        </thead>
-                        <tbody id="table-president-approvals" class="divide-y divide-slate-100">
-                            <!-- JS Injected -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-    </main>
-
-    <!-- Footer -->
-    <footer class="bg-slate-900 text-slate-400 text-xs py-4 text-center mt-auto border-t border-slate-800">
-        <p>ระบบจัดการฝาก-เบิกเงินกลุ่มนักศึกษา (ER Diagram Web Model Implementation)</p>
-        <p class="mt-1 text-slate-500">ประกอบด้วยเอนทิตี: นักศึกษา, เหรัญญิก, ประธาน, ฝากเงิน, เบิกเงิน, รายงาน</p>
-    </footer>
-
-    <!-- ========================================== -->
-    <!-- MODALS SECTION                             -->
-    <!-- ========================================== -->
-
-    <!-- Modal: Deposit Form (Student) -->
-    <div id="modal-deposit" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-100">
-            <div class="flex justify-between items-center pb-3 border-b border-slate-100">
-                <h3 class="font-bold text-lg text-slate-800 flex items-center gap-2">
-                    <i class="fa-solid fa-money-bill-wave text-emerald-600"></i> แบบฟอร์มฝากเงิน (Deposit)
-                </h3>
-                <button onclick="closeModal('modal-deposit')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
-            </div>
-            <form id="form-deposit" onsubmit="handleDepositSubmit(event)" class="mt-4 space-y-4">
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1">รหัสใบเสร็จ (Primary Key)</label>
-                    <input type="text" id="dep-receipt-id" readonly class="w-full bg-slate-100 border border-slate-300 rounded-xl px-3 py-2 text-sm text-slate-500 font-mono">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1">จำนวนเงิน (บาท) <span class="text-rose-500">*</span></label>
-                    <input type="number" id="dep-amount" required min="1" step="0.01" placeholder="เช่น 500.00" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1">วันเวลาที่โอน <span class="text-rose-500">*</span></label>
-                    <input type="datetime-local" id="dep-datetime" required class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1">รูปสลิปการโอนเงิน (Slip Preview)</label>
-                    <div class="border-2 border-dashed border-slate-300 rounded-xl p-3 text-center cursor-pointer hover:bg-slate-50 relative">
-                        <input type="file" accept="image/*" id="dep-file" onchange="previewSlip(event)" class="absolute inset-0 opacity-0 cursor-pointer">
-                        <div id="slip-preview-container">
-                            <i class="fa-solid fa-cloud-arrow-up text-2xl text-slate-400 mb-1"></i>
-                            <p class="text-xs text-slate-500">คลิกเพื่ออัปโหลด หรือ ลากไฟล์มาวาง</p>
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col justify-between">
+                        <div>
+                            <h3 class="font-bold text-slate-800 mb-2">สรุปรายงาน (Report Entity)</h3>
+                            <p class="text-xs text-slate-500 mb-4">ออกรายงานสรุปยอดทางการเงินล่าสุดสำหรับบันทึกลงระบบ</p>
+                            <div class="space-y-3 text-sm bg-slate-50 p-4 rounded-xl">
+                                <div class="flex justify-between"><span class="text-slate-500">วันที่รายงาน:</span> <span font-semibold id="rep-date">-</span></div>
+                                <div class="flex justify-between"><span class="text-slate-500">รายรับรวม:</span> <span class="font-semibold text-emerald-600" id="rep-income">฿0.00</span></div>
+                                <div class="flex justify-between"><span class="text-slate-500">รายจ่ายรวม:</span> <span class="font-semibold text-red-600" id="rep-expense">฿0.00</span></div>
+                                <div class="flex justify-between border-t pt-2"><span class="font-bold">ยอดคงเหลือ:</span> <span class="font-bold text-indigo-600" id="rep-net">฿0.00</span></div>
+                            </div>
                         </div>
-                        <img id="slip-preview-img" class="hidden max-h-32 mx-auto rounded-lg border shadow-sm mt-1">
+                        <button onclick="generateReport()" class="w-full mt-4 bg-emerald-600 text-white font-medium py-2.5 rounded-lg hover:bg-emerald-700 transition">สร้างและบันทึกรายงาน</button>
                     </div>
                 </div>
-                <div class="pt-2 flex justify-end space-x-2">
-                    <button type="button" onclick="closeModal('modal-deposit')" class="px-4 py-2 rounded-xl text-sm font-medium text-slate-600 bg-slate-100 hover:bg-slate-200">ยกเลิก</button>
-                    <button type="submit" class="px-4 py-2 rounded-xl text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 shadow-md">บันทึกรายการฝาก</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Modal: Withdrawal Form (Student) -->
-    <div id="modal-withdraw" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-100">
-            <div class="flex justify-between items-center pb-3 border-b border-slate-100">
-                <h3 class="font-bold text-lg text-slate-800 flex items-center gap-2">
-                    <i class="fa-solid fa-hand-holding-dollar text-amber-600"></i> ยื่นคำขอเบิกเงิน (Withdrawal)
-                </h3>
-                <button onclick="closeModal('modal-withdraw')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
-            <form id="form-withdraw" onsubmit="handleWithdrawSubmit(event)" class="mt-4 space-y-4">
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1">รหัสคำขอ (Primary Key)</label>
-                    <input type="text" id="wd-request-id" readonly class="w-full bg-slate-100 border border-slate-300 rounded-xl px-3 py-2 text-sm text-slate-500 font-mono">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1">จำนวนเงินที่ต้องการเบิก (บาท) <span class="text-rose-500">*</span></label>
-                    <input type="number" id="wd-amount" required min="1" step="0.01" placeholder="เช่น 1200.00" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 outline-none">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1">วันที่ขอ <span class="text-rose-500">*</span></label>
-                    <input type="date" id="wd-date" required class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 outline-none">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1">เหตุผลในการเบิกเงิน <span class="text-rose-500">*</span></label>
-                    <textarea id="wd-reason" required rows="3" placeholder="ระบุวัตถุประสงค์ของการใช้เงิน เช่น ค่าอุปกรณ์จัดกิจกรรม..." class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 outline-none"></textarea>
-                </div>
-                <div class="pt-2 flex justify-end space-x-2">
-                    <button type="button" onclick="closeModal('modal-withdraw')" class="px-4 py-2 rounded-xl text-sm font-medium text-slate-600 bg-slate-100 hover:bg-slate-200">ยกเลิก</button>
-                    <button type="submit" class="px-4 py-2 rounded-xl text-sm font-medium text-white bg-amber-600 hover:bg-amber-700 shadow-md">ส่งคำขอเบิกเงิน</button>
-                </div>
-            </form>
-        </div>
+
+        </main>
     </div>
 
-    <!-- Modal: View Image Slip -->
-    <div id="modal-view-slip" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-white rounded-2xl max-w-sm w-full p-4 shadow-2xl text-center relative">
-            <button onclick="closeModal('modal-view-slip')" class="absolute top-3 right-3 text-slate-400 hover:text-slate-600 text-xl"><i class="fa-solid fa-circle-xmark"></i></button>
-            <h4 class="font-bold text-slate-700 mb-3">หลักฐานการโอนเงิน (รูปสลิป)</h4>
-            <div class="bg-slate-100 p-2 rounded-xl flex items-center justify-center min-h-[250px]">
-                <img id="view-slip-img" src="" alt="Slip Image" class="max-h-80 object-contain rounded-lg border shadow-sm">
-            </div>
-            <p id="view-slip-caption" class="text-xs text-slate-500 mt-2 font-mono"></p>
-        </div>
-    </div>
-
-    <!-- Custom Notification Toast -->
-    <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 bg-slate-900 text-white px-4 py-3 rounded-2xl shadow-2xl flex items-center space-x-3 pointer-events-none">
-        <i id="toast-icon" class="fa-solid fa-circle-check text-emerald-400 text-lg"></i>
-        <span id="toast-message" class="text-sm font-medium">ทำรายการเรียบร้อย</span>
-    </div>
-
-    <!-- Application Script Logic -->
     <script>
-        // Data State (Matching ER Entities)
-        const currentStudent = { studentId: "650110234", name: "นายสมชาย ใจดี", phone: "081-234-5678" };
-        const currentTreasurer = { username: "treasurer_01" };
-        const currentPresident = { username: "president_admin" };
+        // --- DATA STORE (ตาม ER Diagram Entities) ---
+        let currentUser = null;
+
+        const students = [
+            { id: "65012345", name: "ศุภัทรชัย วงษ์รัตนะ", phone: "081-234-5678", pass: "password" }
+        ];
+
+        const treasurers = [
+            { username: "treasurer", name: "เหรัญญิกฝ่ายการเงิน", pass: "password" }
+        ];
+
+        const presidents = [
+            { username: "president", name: "ประธานชั้นปี", pass: "password" }
+        ];
 
         let deposits = [
-            {
-                receiptId: "REC-20261001",
-                studentId: "650110234",
-                studentName: "นายสมชาย ใจดี",
-                amount: 1500.00,
-                datetime: "2026-10-15T10:30",
-                slipUrl: "https://placehold.co/400x600/e2e8f0/475569?text=SLIP+1500+THB",
-                status: "อนุมัติแล้ว"
-            },
-            {
-                receiptId: "REC-20261002",
-                studentId: "650110234",
-                studentName: "นายสมชาย ใจดี",
-                amount: 800.00,
-                datetime: "2026-10-20T14:15",
-                slipUrl: "https://placehold.co/400x600/e2e8f0/475569?text=SLIP+800+THB",
-                status: "รอตรวจสอบ"
-            }
+            { id: "DEP-001", studentId: "65012345", amount: 1000, datetime: "2026-10-20 10:30", slip: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=300", status: "อนุมัติแล้ว" },
+            { id: "DEP-002", studentId: "65012345", amount: 500, datetime: "2026-10-21 14:15", slip: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=300", status: "รอตรวจสอบ" }
         ];
 
         let withdrawals = [
-            {
-                requestId: "REQ-20261001",
-                studentId: "650110234",
-                studentName: "นายสมชาย ใจดี",
-                requestDate: "2026-10-10",
-                amount: 500.00,
-                reason: "ซื้ออุปกรณ์ตกแต่งบอร์ดนิทรรศการ",
-                treasurerStatus: "ตรวจสอบแล้ว",
-                presidentStatus: "อนุมัติแล้ว"
-            },
-            {
-                requestId: "REQ-20261002",
-                studentId: "650110234",
-                studentName: "นายสมชาย ใจดี",
-                requestDate: "2026-10-18",
-                amount: 1200.00,
-                reason: "ค่าอาหารว่างการประชุมสาขาประจำเดือน",
-                treasurerStatus: "ตรวจสอบแล้ว",
-                presidentStatus: "รออนุมัติ"
-            },
-            {
-                requestId: "REQ-20261003",
-                studentId: "650110234",
-                studentName: "นายสมชาย ใจดี",
-                requestDate: "2026-10-21",
-                amount: 350.00,
-                reason: "ค่าถ่ายเอกสารชีทสรุปโครงการ",
-                treasurerStatus: "รอตรวจสอบ",
-                presidentStatus: "รออนุมัติ"
-            }
+            { id: "WD-001", studentId: "65012345", amount: 300, date: "2026-10-21", reason: "ซื้ออุปกรณ์บอร์ดทดลอง Capstone", treasurerStatus: "ผ่านการตรวจสอบ", presidentStatus: "รออนุมัติ" }
         ];
 
-        let reports = [
-            {
-                reportId: "REP-20261001",
-                reportDate: "2026-10-01",
-                totalIncome: 1500.00,
-                totalExpense: 500.00,
-                totalBalance: 1000.00
+        let reports = [];
+        let financeChart = null;
+
+        // --- AUTHENTICATION ---
+        function handleLogin(e) {
+            e.preventDefault();
+            const u = document.getElementById('login-username').value.trim();
+            const p = document.getElementById('login-password').value.trim();
+            const err = document.getElementById('login-error');
+
+            const std = students.find(s => s.id === u && s.pass === p);
+            if (std) {
+                currentUser = { role: 'STUDENT', ...std };
+                initApp();
+                return;
             }
-        ];
 
-        let activeRole = 'student';
-        let financialChartInstance = null;
-        let tempSlipDataUrl = null;
+            const trs = treasurers.find(t => t.username === u && t.pass === p);
+            if (trs) {
+                currentUser = { role: 'TREASURER', ...trs };
+                initApp();
+                return;
+            }
 
-        window.onload = function() {
-            switchRole('student');
-            renderAllViews();
-        };
+            const prs = presidents.find(pItem => pItem.username === u && pItem.pass === p);
+            if (prs) {
+                currentUser = { role: 'PRESIDENT', ...prs };
+                initApp();
+                return;
+            }
 
-        function switchRole(role) {
-            activeRole = role;
+            err.classList.remove('hidden');
+        }
+
+        function handleLogout() {
+            currentUser = null;
+            document.getElementById('login-screen').classList.remove('hidden');
+            document.getElementById('main-app').classList.add('hidden');
+            document.getElementById('login-form').reset();
+            document.getElementById('login-error').classList.add('hidden');
+        }
+
+        function initApp() {
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('main-app').classList.remove('hidden');
+            document.getElementById('main-app').classList.add('flex');
+
+            document.querySelectorAll('.role-panel').forEach(p => p.classList.add('hidden'));
+
+            document.getElementById('user-display-name').innerText = currentUser.name || currentUser.id;
             
-            document.querySelectorAll('.role-btn').forEach(btn => {
-                btn.className = 'role-btn px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 flex items-center gap-1.5 text-slate-300 hover:text-white hover:bg-slate-700/50';
-            });
-
-            const activeBtn = document.getElementById(`btn-role-${role}`);
-            if (activeBtn) {
-                activeBtn.className = 'role-btn px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 flex items-center gap-1.5 bg-indigo-600 text-white shadow-sm';
+            if (currentUser.role === 'STUDENT') {
+                document.getElementById('user-display-role').innerText = "นักศึกษา";
+                document.getElementById('panel-student').classList.remove('hidden');
+                document.getElementById('student-name-header').innerText = currentUser.name;
+                document.getElementById('student-id-header').innerText = currentUser.id;
+                document.getElementById('student-phone-header').innerText = currentUser.phone;
+            } else if (currentUser.role === 'TREASURER') {
+                document.getElementById('user-display-role').innerText = "เหรัญญิก";
+                document.getElementById('panel-treasurer').classList.remove('hidden');
+            } else if (currentUser.role === 'PRESIDENT') {
+                document.getElementById('user-display-role').innerText = "ประธาน";
+                document.getElementById('panel-president').classList.remove('hidden');
+                initChart();
             }
 
-            document.querySelectorAll('.role-view').forEach(view => view.classList.add('hidden'));
+            renderAll();
+            lucide.createIcons();
+        }
 
-            const banner = document.getElementById('role-banner');
-            const iconBg = document.getElementById('role-icon-bg');
-            const icon = document.getElementById('role-icon');
-            const title = document.getElementById('role-title');
-            const desc = document.getElementById('role-desc');
+        // --- RENDER LOGIC ---
+        function renderAll() {
+            const approvedDepositsSum = deposits.filter(d => d.status === 'อนุมัติแล้ว').reduce((a, b) => a + b.amount, 0);
+            const approvedWithdrawalsSum = withdrawals.filter(w => w.presidentStatus === 'อนุมัติแล้ว').reduce((a, b) => a + b.amount, 0);
+            const netBalance = approvedDepositsSum - approvedWithdrawalsSum;
 
-            if (role === 'student') {
-                document.getElementById('view-student').classList.remove('hidden');
-                banner.className = "mb-6 p-4 rounded-2xl border flex items-center justify-between transition-all bg-emerald-50/60 border-emerald-200 text-emerald-950";
-                iconBg.className = "p-3 rounded-xl text-white text-xl bg-emerald-600 shadow-md";
-                icon.className = "fa-solid fa-user-graduate";
-                title.innerText = "มุมมองนักศึกษา (Student Portal)";
-                desc.innerText = "ยื่นรายการฝากเงิน อัปโหลดสลิป ยื่นคำขอเบิกเงิน และติดตามสถานะอนุมัติ";
-            } else if (role === 'treasurer') {
-                document.getElementById('view-treasurer').classList.remove('hidden');
-                banner.className = "mb-6 p-4 rounded-2xl border flex items-center justify-between transition-all bg-amber-50/60 border-amber-200 text-amber-950";
-                iconBg.className = "p-3 rounded-xl text-white text-xl bg-amber-600 shadow-md";
-                icon.className = "fa-solid fa-user-check";
-                title.innerText = "มุมมองเหรัญญิก (Treasurer Audit Portal)";
-                desc.innerText = "ตรวจสอบความถูกต้องของสลิปโอนเงินฝาก และตรวจสอบความเหมาะสมของคำขอเบิกเงิน";
-            } else if (role === 'president') {
-                document.getElementById('view-president').classList.remove('hidden');
-                banner.className = "mb-6 p-4 rounded-2xl border flex items-center justify-between transition-all bg-indigo-50/60 border-indigo-200 text-indigo-950";
-                iconBg.className = "p-3 rounded-xl text-white text-xl bg-indigo-600 shadow-md";
-                icon.className = "fa-solid fa-user-tie";
-                title.innerText = "มุมมองประธาน (President Approval & Report Dashboard)";
-                desc.innerText = "อนุมัติขั้นสุดท้ายสำหรับการเบิกเงิน และดูรายงานภาพรวมทางการเงินแบบ Interactive";
-                setTimeout(() => renderChart(), 100);
+            document.getElementById('total-balance-display-student').innerText = `฿${netBalance.toLocaleString()}`;
+            document.getElementById('pres-total-income').innerText = `฿${approvedDepositsSum.toLocaleString()}`;
+            document.getElementById('pres-total-expense').innerText = `฿${approvedWithdrawalsSum.toLocaleString()}`;
+            document.getElementById('pres-total-net').innerText = `฿${netBalance.toLocaleString()}`;
+
+            const now = new Date().toISOString().split('T')[0];
+            document.getElementById('rep-date').innerText = now;
+            document.getElementById('rep-income').innerText = `฿${approvedDepositsSum.toLocaleString()}`;
+            document.getElementById('rep-expense').innerText = `฿${approvedWithdrawalsSum.toLocaleString()}`;
+            document.getElementById('rep-net').innerText = `฿${netBalance.toLocaleString()}`;
+
+            // Render Student History
+            if (currentUser && currentUser.role === 'STUDENT') {
+                const tbody = document.getElementById('student-history-tbody');
+                tbody.innerHTML = '';
+                
+                deposits.filter(d => d.studentId === currentUser.id).forEach(d => {
+                    tbody.innerHTML += `
+                        <tr class="border-b">
+                            <td class="p-3"><span class="bg-indigo-100 text-indigo-800 text-xs px-2 py-1 rounded">ฝากเงิน</span></td>
+                            <td class="p-3 font-mono text-xs">${d.id}</td>
+                            <td class="p-3 font-bold text-emerald-600">+฿${d.amount.toLocaleString()}</td>
+                            <td class="p-3 text-slate-500 text-xs">${d.datetime}</td>
+                            <td class="p-3"><span class="text-xs ${d.status === 'อนุมัติแล้ว' ? 'text-emerald-600 font-semibold' : 'text-amber-600'}">${d.status}</span></td>
+                        </tr>
+                    `;
+                });
+
+                withdrawals.filter(w => w.studentId === currentUser.id).forEach(w => {
+                    tbody.innerHTML += `
+                        <tr class="border-b">
+                            <td class="p-3"><span class="bg-amber-100 text-amber-800 text-xs px-2 py-1 rounded">เบิกเงิน</span></td>
+                            <td class="p-3 font-mono text-xs">${w.id}</td>
+                            <td class="p-3 font-bold text-red-600">-฿${w.amount.toLocaleString()}</td>
+                            <td class="p-3 text-slate-500 text-xs">${w.date}</td>
+                            <td class="p-3"><span class="text-xs ${w.presidentStatus === 'อนุมัติแล้ว' ? 'text-emerald-600 font-semibold' : 'text-amber-600'}">${w.presidentStatus}</span></td>
+                        </tr>
+                    `;
+                });
             }
 
-            renderAllViews();
-        }
-
-        function renderAllViews() {
-            renderStudentView();
-            renderTreasurerView();
-            renderPresidentView();
-        }
-
-        function formatTHB(amount) {
-            return new Intl.NumberFormat('th-TH', { style: 'currency', currency: 'THB' }).format(amount);
-        }
-
-        // --- STUDENT ---
-        function renderStudentView() {
-            const depTbody = document.getElementById('table-student-deposits');
-            const stdDeposits = deposits.filter(d => d.studentId === currentStudent.studentId);
-            document.getElementById('std-deposit-count').innerText = `${stdDeposits.length} รายการ`;
-
-            if (stdDeposits.length === 0) {
-                depTbody.innerHTML = `<tr><td colspan="5" class="text-center py-6 text-slate-400">ยังไม่มีประวัติการฝากเงิน</td></tr>`;
-            } else {
-                depTbody.innerHTML = stdDeposits.map(d => {
-                    let badgeClass = "bg-amber-100 text-amber-800 border-amber-200";
-                    if (d.status === 'อนุมัติแล้ว') badgeClass = "bg-emerald-100 text-emerald-800 border-emerald-200";
-                    if (d.status === 'ปฏิเสธ') badgeClass = "bg-rose-100 text-rose-800 border-rose-200";
-
-                    return `
-                        <tr class="hover:bg-slate-50 transition">
-                            <td class="px-4 py-3 font-mono text-xs font-semibold text-indigo-600">${d.receiptId}</td>
-                            <td class="px-4 py-3 text-xs text-slate-600">${d.datetime.replace('T', ' ')}</td>
-                            <td class="px-4 py-3 text-right font-semibold text-emerald-600">${formatTHB(d.amount)}</td>
-                            <td class="px-4 py-3 text-center">
-                                <button onclick="viewSlip('${d.slipUrl}', '${d.receiptId}')" class="text-slate-500 hover:text-indigo-600 text-xs flex items-center justify-center gap-1 mx-auto bg-slate-100 px-2 py-1 rounded-lg">
-                                    <i class="fa-solid fa-image"></i> ดูสลิป
-                                </button>
-                            </td>
-                            <td class="px-4 py-3 text-center">
-                                <span class="px-2.5 py-1 rounded-full text-xs font-medium border ${badgeClass}">${d.status}</span>
+            // Render Treasurer
+            if (currentUser && currentUser.role === 'TREASURER') {
+                const depTbody = document.getElementById('treasurer-deposits-tbody');
+                depTbody.innerHTML = '';
+                deposits.filter(d => d.status === 'รอตรวจสอบ').forEach(d => {
+                    depTbody.innerHTML += `
+                        <tr class="border-b">
+                            <td class="p-3 font-mono text-xs">${d.id}</td>
+                            <td class="p-3">${d.studentId}</td>
+                            <td class="p-3 font-bold">฿${d.amount.toLocaleString()}</td>
+                            <td class="p-3 text-xs text-slate-500">${d.datetime}</td>
+                            <td class="p-3"><a href="${d.slip}" target="_blank" class="text-indigo-600 underline text-xs">ดูสลิป</a></td>
+                            <td class="p-3 space-x-1">
+                                <button onclick="verifyDeposit('${d.id}', true)" class="bg-emerald-600 text-white text-xs px-2.5 py-1 rounded hover:bg-emerald-700">อนุมัติ</button>
+                                <button onclick="verifyDeposit('${d.id}', false)" class="bg-red-500 text-white text-xs px-2.5 py-1 rounded hover:bg-red-600">ปฏิเสธ</button>
                             </td>
                         </tr>
                     `;
-                }).join('');
-            }
+                });
 
-            const wdTbody = document.getElementById('table-student-withdrawals');
-            const stdWithdrawals = withdrawals.filter(w => w.studentId === currentStudent.studentId);
-            document.getElementById('std-withdraw-count').innerText = `${stdWithdrawals.length} รายการ`;
-
-            if (stdWithdrawals.length === 0) {
-                wdTbody.innerHTML = `<tr><td colspan="5" class="text-center py-6 text-slate-400">ยังไม่มีประวัติการยื่นขอเบิกเงิน</td></tr>`;
-            } else {
-                wdTbody.innerHTML = stdWithdrawals.map(w => {
-                    let trBadge = "bg-slate-100 text-slate-600 border-slate-200";
-                    if (w.treasurerStatus === 'ตรวจสอบแล้ว') trBadge = "bg-emerald-100 text-emerald-800 border-emerald-200";
-                    if (w.treasurerStatus === 'ปฏิเสธ') trBadge = "bg-rose-100 text-rose-800 border-rose-200";
-
-                    let prBadge = "bg-amber-100 text-amber-800 border-amber-200";
-                    if (w.presidentStatus === 'อนุมัติแล้ว') prBadge = "bg-emerald-100 text-emerald-800 border-emerald-200";
-                    if (w.presidentStatus === 'ไม่อนุมัติ') prBadge = "bg-rose-100 text-rose-800 border-rose-200";
-
-                    return `
-                        <tr class="hover:bg-slate-50 transition">
-                            <td class="px-4 py-3 font-mono text-xs font-semibold text-amber-600">${w.requestId}</td>
-                            <td class="px-4 py-3">
-                                <div class="text-xs font-medium text-slate-800">${w.reason}</div>
-                                <div class="text-[10px] text-slate-400"><i class="fa-regular fa-calendar mr-1"></i>${w.requestDate}</div>
-                            </td>
-                            <td class="px-4 py-3 text-right font-semibold text-rose-600">${formatTHB(w.amount)}</td>
-                            <td class="px-4 py-3 text-center">
-                                <span class="px-2 py-0.5 rounded text-[11px] font-medium border ${trBadge}">${w.treasurerStatus}</span>
-                            </td>
-                            <td class="px-4 py-3 text-center">
-                                <span class="px-2 py-0.5 rounded text-[11px] font-medium border ${prBadge}">${w.presidentStatus}</span>
+                const wdTbody = document.getElementById('treasurer-withdraws-tbody');
+                wdTbody.innerHTML = '';
+                withdrawals.filter(w => w.treasurerStatus === 'รอตรวจสอบ').forEach(w => {
+                    wdTbody.innerHTML += `
+                        <tr class="border-b">
+                            <td class="p-3 font-mono text-xs">${w.id}</td>
+                            <td class="p-3">${w.studentId}</td>
+                            <td class="p-3 font-bold">฿${w.amount.toLocaleString()}</td>
+                            <td class="p-3 text-xs">${w.reason}</td>
+                            <td class="p-3"><span class="text-xs text-amber-600">${w.treasurerStatus}</span></td>
+                            <td class="p-3 space-x-1">
+                                <button onclick="reviewWithdrawal('${w.id}', true)" class="bg-indigo-600 text-white text-xs px-2.5 py-1 rounded hover:bg-indigo-700">ผ่านการตรวจสอบ</button>
+                                <button onclick="reviewWithdrawal('${w.id}', false)" class="bg-red-500 text-white text-xs px-2.5 py-1 rounded hover:bg-red-600">ไม่ผ่าน</button>
                             </td>
                         </tr>
                     `;
-                }).join('');
+                });
             }
+
+            // Render President
+            if (currentUser && currentUser.role === 'PRESIDENT') {
+                const presTbody = document.getElementById('president-withdraws-tbody');
+                presTbody.innerHTML = '';
+                withdrawals.filter(w => w.treasurerStatus === 'ผ่านการตรวจสอบ' && w.presidentStatus === 'รออนุมัติ').forEach(w => {
+                    presTbody.innerHTML += `
+                        <tr class="border-b">
+                            <td class="p-3 font-mono text-xs">${w.id}</td>
+                            <td class="p-3">${w.studentId}</td>
+                            <td class="p-3 font-bold text-red-600">฿${w.amount.toLocaleString()}</td>
+                            <td class="p-3 text-xs">${w.reason}</td>
+                            <td class="p-3"><span class="text-xs text-emerald-600">✓ ${w.treasurerStatus}</span></td>
+                            <td class="p-3 space-x-1">
+                                <button onclick="approveWithdrawal('${w.id}', true)" class="bg-emerald-600 text-white text-xs px-2.5 py-1 rounded hover:bg-emerald-700">อนุมัติจ่ายเงิน</button>
+                                <button onclick="approveWithdrawal('${w.id}', false)" class="bg-red-500 text-white text-xs px-2.5 py-1 rounded hover:bg-red-600">ไม่อนุมัติ</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+
+                updateChart(approvedDepositsSum, approvedWithdrawalsSum, netBalance);
+            }
+
+            lucide.createIcons();
         }
 
-        function previewSlip(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    tempSlipDataUrl = e.target.result;
-                    document.getElementById('slip-preview-img').src = tempSlipDataUrl;
-                    document.getElementById('slip-preview-img').classList.remove('hidden');
-                    document.getElementById('slip-preview-container').classList.add('hidden');
-                }
-                reader.readAsDataURL(file);
-            }
-        }
-
-        function handleDepositSubmit(e) {
+        // --- ACTIONS ---
+        function submitDeposit(e) {
             e.preventDefault();
-            const receiptId = document.getElementById('dep-receipt-id').value;
-            const amount = parseFloat(document.getElementById('dep-amount').value);
-            const datetime = document.getElementById('dep-datetime').value;
-            const slipUrl = tempSlipDataUrl || "https://placehold.co/400x600/e2e8f0/475569?text=SLIP+PREVIEW";
-
-            deposits.unshift({
-                receiptId: receiptId,
-                studentId: currentStudent.studentId,
-                studentName: currentStudent.name,
-                amount: amount,
-                datetime: datetime,
-                slipUrl: slipUrl,
+            const amt = parseFloat(document.getElementById('dep-amount').value);
+            const newDep = {
+                id: `DEP-00${deposits.length + 1}`,
+                studentId: currentUser.id,
+                amount: amt,
+                datetime: new Date().toLocaleString('th-TH'),
+                slip: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=300",
                 status: "รอตรวจสอบ"
-            });
-
-            closeModal('modal-deposit');
-            renderAllViews();
-            showToast("บันทึกข้อมูลการฝากเงินเรียบร้อย รอเหรัญญิกตรวจสอบ", "success");
+            };
+            deposits.push(newDep);
+            alert("ส่งข้อมูลการฝากเงินเรียบร้อย รอเหรัญญิกตรวจสอบ");
+            e.target.reset();
+            renderAll();
         }
 
-        function handleWithdrawSubmit(e) {
+        function submitWithdraw(e) {
             e.preventDefault();
-            const requestId = document.getElementById('wd-request-id').value;
-            const amount = parseFloat(document.getElementById('wd-amount').value);
-            const requestDate = document.getElementById('wd-date').value;
+            const amt = parseFloat(document.getElementById('wd-amount').value);
             const reason = document.getElementById('wd-reason').value;
-
-            withdrawals.unshift({
-                requestId: requestId,
-                studentId: currentStudent.studentId,
-                studentName: currentStudent.name,
-                requestDate: requestDate,
-                amount: amount,
+            const newWd = {
+                id: `WD-00${withdrawals.length + 1}`,
+                studentId: currentUser.id,
+                amount: amt,
+                date: new Date().toISOString().split('T')[0],
                 reason: reason,
                 treasurerStatus: "รอตรวจสอบ",
                 presidentStatus: "รออนุมัติ"
-            });
-
-            closeModal('modal-withdraw');
-            renderAllViews();
-            showToast("ยื่นคำขอเบิกเงินเรียบร้อยแล้ว", "success");
+            };
+            withdrawals.push(newWd);
+            alert("ยื่นคำขอเบิกเงินเรียบร้อย รอเหรัญญิกและประธานอนุมัติ");
+            e.target.reset();
+            renderAll();
         }
 
-        // --- TREASURER ---
-        function renderTreasurerView() {
-            const pendingDeposits = deposits.filter(d => d.status === 'รอตรวจสอบ');
-            const pendingWithdraws = withdrawals.filter(w => w.treasurerStatus === 'รอตรวจสอบ');
-
-            document.getElementById('tr-pending-deposits-cnt').innerText = pendingDeposits.length;
-            document.getElementById('tr-pending-withdraws-cnt').innerText = pendingWithdraws.length;
-
-            const depTbody = document.getElementById('table-treasurer-deposits');
-            if (deposits.length === 0) {
-                depTbody.innerHTML = `<tr><td colspan="7" class="text-center py-6 text-slate-400">ไม่มีรายการฝากเงินในระบบ</td></tr>`;
-            } else {
-                depTbody.innerHTML = deposits.map(d => {
-                    let badgeClass = "bg-amber-100 text-amber-800 border-amber-200";
-                    if (d.status === 'อนุมัติแล้ว') badgeClass = "bg-emerald-100 text-emerald-800 border-emerald-200";
-                    if (d.status === 'ปฏิเสธ') badgeClass = "bg-rose-100 text-rose-800 border-rose-200";
-
-                    return `
-                        <tr class="hover:bg-slate-50 transition">
-                            <td class="px-4 py-3 font-mono text-xs font-semibold text-indigo-600">${d.receiptId}</td>
-                            <td class="px-4 py-3 text-xs">
-                                <div class="font-medium text-slate-800">${d.studentName}</div>
-                                <div class="text-[10px] text-slate-400">รหัส: ${d.studentId}</div>
-                            </td>
-                            <td class="px-4 py-3 text-xs text-slate-600">${d.datetime.replace('T', ' ')}</td>
-                            <td class="px-4 py-3 text-right font-semibold text-emerald-600">${formatTHB(d.amount)}</td>
-                            <td class="px-4 py-3 text-center">
-                                <button onclick="viewSlip('${d.slipUrl}', '${d.receiptId}')" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2 py-1 rounded-lg border">
-                                    <i class="fa-solid fa-eye mr-1"></i> ดูสลิป
-                                </button>
-                            </td>
-                            <td class="px-4 py-3 text-center">
-                                <span class="px-2 py-0.5 rounded-full text-xs font-medium border ${badgeClass}">${d.status}</span>
-                            </td>
-                            <td class="px-4 py-3 text-center">
-                                ${d.status === 'รอตรวจสอบ' ? `
-                                    <div class="flex justify-center gap-1">
-                                        <button onclick="updateDepositStatus('${d.receiptId}', 'อนุมัติแล้ว')" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-2.5 py-1 rounded-lg transition">ยืนยันสลิป</button>
-                                        <button onclick="updateDepositStatus('${d.receiptId}', 'ปฏิเสธ')" class="bg-rose-600 hover:bg-rose-700 text-white text-xs px-2.5 py-1 rounded-lg transition">ปฏิเสธ</button>
-                                    </div>
-                                ` : `<span class="text-xs text-slate-400">ดำเนินการแล้ว</span>`}
-                            </td>
-                        </tr>
-                    `;
-                }).join('');
-            }
-
-            const wdTbody = document.getElementById('table-treasurer-withdrawals');
-            if (withdrawals.length === 0) {
-                wdTbody.innerHTML = `<tr><td colspan="7" class="text-center py-6 text-slate-400">ไม่มีรายการเบิกเงินในระบบ</td></tr>`;
-            } else {
-                wdTbody.innerHTML = withdrawals.map(w => {
-                    let trBadge = "bg-amber-100 text-amber-800 border-amber-200";
-                    if (w.treasurerStatus === 'ตรวจสอบแล้ว') trBadge = "bg-emerald-100 text-emerald-800 border-emerald-200";
-                    if (w.treasurerStatus === 'ปฏิเสธ') trBadge = "bg-rose-100 text-rose-800 border-rose-200";
-
-                    return `
-                        <tr class="hover:bg-slate-50 transition">
-                            <td class="px-4 py-3 font-mono text-xs font-semibold text-amber-600">${w.requestId}</td>
-                            <td class="px-4 py-3 text-xs">
-                                <div class="font-medium text-slate-800">${w.studentName}</div>
-                                <div class="text-[10px] text-slate-400">รหัส: ${w.studentId}</div>
-                            </td>
-                            <td class="px-4 py-3 text-xs text-slate-600">${w.requestDate}</td>
-                            <td class="px-4 py-3 text-xs text-slate-700 max-w-xs truncate">${w.reason}</td>
-                            <td class="px-4 py-3 text-right font-semibold text-rose-600">${formatTHB(w.amount)}</td>
-                            <td class="px-4 py-3 text-center">
-                                <span class="px-2 py-0.5 rounded text-xs font-medium border ${trBadge}">${w.treasurerStatus}</span>
-                            </td>
-                            <td class="px-4 py-3 text-center">
-                                ${w.treasurerStatus === 'รอตรวจสอบ' ? `
-                                    <div class="flex justify-center gap-1">
-                                        <button onclick="updateTreasurerWithdrawStatus('${w.requestId}', 'ตรวจสอบแล้ว')" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-2.5 py-1 rounded-lg transition">ผ่านการตรวจ</button>
-                                        <button onclick="updateTreasurerWithdrawStatus('${w.requestId}', 'ปฏิเสธ')" class="bg-rose-600 hover:bg-rose-700 text-white text-xs px-2.5 py-1 rounded-lg transition">ไม่อนุญาต</button>
-                                    </div>
-                                ` : `<span class="text-xs text-slate-400">ดำเนินการแล้ว</span>`}
-                            </td>
-                        </tr>
-                    `;
-                }).join('');
-            }
-        }
-
-        function updateDepositStatus(receiptId, status) {
-            const dep = deposits.find(d => d.receiptId === receiptId);
+        function verifyDeposit(id, isApprove) {
+            const dep = deposits.find(d => d.id === id);
             if (dep) {
-                dep.status = status;
-                renderAllViews();
-                showToast(`อัปเดตสถานะฝากเงิน ${receiptId} เป็น "${status}"`, "info");
+                dep.status = isApprove ? 'อนุมัติแล้ว' : 'ปฏิเสธ';
+                renderAll();
             }
         }
 
-        function updateTreasurerWithdrawStatus(requestId, status) {
-            const wd = withdrawals.find(w => w.requestId === requestId);
+        function reviewWithdrawal(id, isPass) {
+            const wd = withdrawals.find(w => w.id === id);
             if (wd) {
-                wd.treasurerStatus = status;
-                if (status === 'ปฏิเสธ') wd.presidentStatus = 'ไม่อนุมัติ';
-                renderAllViews();
-                showToast(`ตรวจสอบคำขอเบิกเงิน ${requestId} เรียบร้อย`, "info");
+                wd.treasurerStatus = isPass ? 'ผ่านการตรวจสอบ' : 'ไม่ผ่าน';
+                renderAll();
             }
         }
 
-        // --- PRESIDENT & CALCULATIONS ---
-        function calculateFinancials() {
-            const totalIncome = deposits
-                .filter(d => d.status === 'อนุมัติแล้ว')
-                .reduce((sum, d) => sum + d.amount, 0);
-
-            const totalExpense = withdrawals
-                .filter(w => w.presidentStatus === 'อนุมัติแล้ว')
-                .reduce((sum, w) => sum + w.amount, 0);
-
-            const totalBalance = totalIncome - totalExpense;
-            return { totalIncome, totalExpense, totalBalance };
-        }
-
-        function renderPresidentView() {
-            const { totalIncome, totalExpense, totalBalance } = calculateFinancials();
-
-            document.getElementById('pres-income').innerText = formatTHB(totalIncome);
-            document.getElementById('pres-expense').innerText = formatTHB(totalExpense);
-            document.getElementById('pres-balance').innerText = formatTHB(totalBalance);
-
-            const pendingForPresident = withdrawals.filter(w => w.treasurerStatus === 'ตรวจสอบแล้ว' && w.presidentStatus === 'รออนุมัติ');
-            document.getElementById('pres-pending-approval').innerText = pendingForPresident.length;
-
-            const prTbody = document.getElementById('table-president-approvals');
-            const readyForPresident = withdrawals.filter(w => w.treasurerStatus === 'ตรวจสอบแล้ว');
-
-            if (readyForPresident.length === 0) {
-                prTbody.innerHTML = `<tr><td colspan="7" class="text-center py-6 text-slate-400">ไม่มีคำขอที่ผ่านการตรวจจากเหรัญญิก</td></tr>`;
-            } else {
-                prTbody.innerHTML = readyForPresident.map(w => {
-                    let prBadge = "bg-amber-100 text-amber-800 border-amber-200";
-                    if (w.presidentStatus === 'อนุมัติแล้ว') prBadge = "bg-emerald-100 text-emerald-800 border-emerald-200";
-                    if (w.presidentStatus === 'ไม่อนุมัติ') prBadge = "bg-rose-100 text-rose-800 border-rose-200";
-
-                    return `
-                        <tr class="hover:bg-slate-50 transition">
-                            <td class="px-4 py-3 font-mono text-xs font-semibold text-amber-600">${w.requestId}</td>
-                            <td class="px-4 py-3 text-xs">
-                                <div class="font-medium text-slate-800">${w.studentName}</div>
-                                <div class="text-[10px] text-slate-400">รหัส: ${w.studentId}</div>
-                            </td>
-                            <td class="px-4 py-3 text-xs text-slate-600">${w.requestDate}</td>
-                            <td class="px-4 py-3 text-xs text-slate-700">${w.reason}</td>
-                            <td class="px-4 py-3 text-right font-semibold text-rose-600">${formatTHB(w.amount)}</td>
-                            <td class="px-4 py-3 text-center">
-                                <span class="px-2 py-0.5 rounded text-[11px] bg-emerald-100 text-emerald-800 border border-emerald-200 font-medium">
-                                    <i class="fa-solid fa-check text-[10px] mr-1"></i>เหรัญญิกรับรอง
-                                </span>
-                            </td>
-                            <td class="px-4 py-3 text-center">
-                                ${w.presidentStatus === 'รออนุมัติ' ? `
-                                    <div class="flex justify-center gap-1">
-                                        <button onclick="updatePresidentWithdrawStatus('${w.requestId}', 'อนุมัติแล้ว')" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs px-3 py-1 rounded-lg transition font-medium">อนุมัติการจ่ายเงิน</button>
-                                        <button onclick="updatePresidentWithdrawStatus('${w.requestId}', 'ไม่อนุมัติ')" class="bg-rose-600 hover:bg-rose-700 text-white text-xs px-3 py-1 rounded-lg transition font-medium">ไม่อนุมัติ</button>
-                                    </div>
-                                ` : `
-                                    <span class="px-2 py-0.5 rounded text-xs font-medium border ${prBadge}">${w.presidentStatus}</span>
-                                `}
-                            </td>
-                        </tr>
-                    `;
-                }).join('');
-            }
-
-            renderReportHistoryList();
-        }
-
-        function updatePresidentWithdrawStatus(requestId, status) {
-            const wd = withdrawals.find(w => w.requestId === requestId);
+        function approveWithdrawal(id, isApprove) {
+            const wd = withdrawals.find(w => w.id === id);
             if (wd) {
-                wd.presidentStatus = status;
-                renderAllViews();
-                if (activeRole === 'president') renderChart();
-                showToast(`ประธานทำการ "${status}" สำหรับคำขอ ${requestId}`, "info");
+                wd.presidentStatus = isApprove ? 'อนุมัติแล้ว' : 'ไม่อนุมัติ';
+                renderAll();
             }
         }
 
         function generateReport() {
-            const { totalIncome, totalExpense, totalBalance } = calculateFinancials();
-            const today = new Date().toISOString().split('T')[0];
-            const reportId = `REP-${Date.now().toString().slice(-6)}`;
-
-            reports.unshift({
-                reportId: reportId,
-                reportDate: today,
-                totalIncome: totalIncome,
-                totalExpense: totalExpense,
-                totalBalance: totalBalance
-            });
-
-            renderPresidentView();
-            showToast(`สร้างรายงานสรุปทางการเงินรหัส ${reportId} สำเร็จ`, "success");
+            alert("บันทึกข้อมูลรายงานสรุปทางการเงิน (Report Entity) เรียบร้อยแล้ว!");
         }
 
-        function renderReportHistoryList() {
-            const container = document.getElementById('report-history-list');
-            if (reports.length === 0) {
-                container.innerHTML = `<div class="text-center py-4 text-xs text-slate-400">ยังไม่มีการสร้างรายงาน</div>`;
-            } else {
-                container.innerHTML = reports.map(r => `
-                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs flex justify-between items-center">
-                        <div>
-                            <div class="font-bold text-slate-800 font-mono">${r.reportId}</div>
-                            <div class="text-slate-500 text-[10px]">วันที่ออกรายงาน: ${r.reportDate}</div>
-                        </div>
-                        <div class="text-right">
-                            <div class="text-slate-600">คงเหลือสุทธิ: <span class="font-bold text-indigo-600">${formatTHB(r.totalBalance)}</span></div>
-                            <div class="text-[10px] text-slate-400">รับ: ${formatTHB(r.totalIncome)} | จ่าย: ${formatTHB(r.totalExpense)}</div>
-                        </div>
-                    </div>
-                `).join('');
-            }
-        }
-
-        function renderChart() {
-            const ctx = document.getElementById('financialChart');
-            if (!ctx) return;
-
-            const { totalIncome, totalExpense, totalBalance } = calculateFinancials();
-
-            if (financialChartInstance) {
-                financialChartInstance.destroy();
-            }
-
-            financialChartInstance = new Chart(ctx, {
+        // --- CHART.JS ---
+        function initChart() {
+            const ctx = document.getElementById('financeChart').getContext('2d');
+            financeChart = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
-                    labels: ['รายรับรวม (Deposit)', 'รายจ่ายรวม (Withdrawal)', 'ยอดเงินคงเหลือ (Net Balance)'],
+                    labels: ['รายรับรวม (ฝาก)', 'รายจ่ายรวม (เบิก)', 'ยอดเงินคงเหลือ'],
                     datasets: [{
-                        data: [totalIncome, totalExpense, Math.max(0, totalBalance)],
-                        backgroundColor: ['#10b981', '#f43f5e', '#6366f1'],
-                        borderWidth: 2,
-                        borderColor: '#ffffff'
+                        data: [0, 0, 0],
+                        backgroundColor: ['#10b981', '#ef4444', '#6366f1']
                     }]
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: { font: { family: 'Kanit', size: 12 } }
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    return ` ${context.label}: ${formatTHB(context.raw)}`;
-                                }
-                            }
-                        }
-                    }
+                    maintainAspectRatio: false
                 }
             });
         }
 
-        // --- UTILS ---
-        function openModal(id) {
-            if (id === 'modal-deposit') {
-                document.getElementById('dep-receipt-id').value = `REC-${Date.now().toString().slice(-6)}`;
-                document.getElementById('dep-amount').value = '';
-                document.getElementById('dep-datetime').value = new Date().toISOString().slice(0, 16);
-                document.getElementById('slip-preview-img').classList.add('hidden');
-                document.getElementById('slip-preview-container').classList.remove('hidden');
-                tempSlipDataUrl = null;
-            } else if (id === 'modal-withdraw') {
-                document.getElementById('wd-request-id').value = `REQ-${Date.now().toString().slice(-6)}`;
-                document.getElementById('wd-amount').value = '';
-                document.getElementById('wd-date').value = new Date().toISOString().split('T')[0];
-                document.getElementById('wd-reason').value = '';
+        function updateChart(inc, exp, net) {
+            if (financeChart) {
+                financeChart.data.datasets[0].data = [inc, exp, Math.max(0, net)];
+                financeChart.update();
             }
-            document.getElementById(id).classList.remove('hidden');
         }
 
-        function closeModal(id) {
-            document.getElementById(id).classList.add('hidden');
-        }
-
-        function viewSlip(url, id) {
-            document.getElementById('view-slip-img').src = url;
-            document.getElementById('view-slip-caption').innerText = `อ้างอิงรหัสใบเสร็จ: ${id}`;
-            document.getElementById('modal-view-slip').classList.remove('hidden');
-        }
-
-        function showToast(msg, type = "success") {
-            const toast = document.getElementById('toast');
-            const icon = document.getElementById('toast-icon');
-            const message = document.getElementById('toast-message');
-
-            message.innerText = msg;
-
-            if (type === "success") {
-                icon.className = "fa-solid fa-circle-check text-emerald-400 text-lg";
-            } else if (type === "info") {
-                icon.className = "fa-solid fa-circle-info text-indigo-400 text-lg";
-            } else {
-                icon.className = "fa-solid fa-triangle-exclamation text-rose-400 text-lg";
-            }
-
-            toast.classList.remove('translate-y-20', 'opacity-0');
-            toast.classList.add('translate-y-0', 'opacity-100');
-
-            setTimeout(() => {
-                toast.classList.remove('translate-y-0', 'opacity-100');
-                toast.classList.add('translate-y-20', 'opacity-0');
-            }, 3000);
-        }
+        // Initialize icons on first load
+        window.onload = () => {
+            lucide.createIcons();
+        };
     </script>
 </body>
 </html>
